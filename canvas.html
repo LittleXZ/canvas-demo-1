@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <style>
+        *{margin: 0;padding: 0;box-sizing: border-box}
+        canvas{
+            display: block;
+        }
+    </style>
+    <!--   重置CSS样式
+            因为 canvas 默认是一个行内替换元素，baseline和行底部之间有距离。 display 设定为 block 即可解决这个问题
+    -->
+    <title>canvas画板</title>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        let canvas = document.getElementById('canvas');  // 先用获取到ID为canvas的这个元素，
+        canvas.width = document.documentElement.clientWidth;  //把canvas的宽高设计的跟页面一样宽高，能整页画画
+        canvas.height = document.documentElement.clientHeight;
+        let ctx = canvas.getContext("2d"); //绘图环境
+        ctx.strokeStyle = 'green';  //设置为绿色
+        ctx.lineWidth = 10;  //设置线宽度
+        ctx.lineCap = 'round';  //设置线线段末端以圆形结束
+        let painting = false;  //当鼠标未点击时
+        let start;
+        function drawLine(x1, y1, x2, y2) {  //声明一个简写函数
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);  //起始坐标
+            ctx.lineTo(x2, y2);  //结束坐标
+            ctx.stroke();  //描边
+        }
+
+        let isTouch = 'ontouchstart' in document.documentElement; //判断是否有触控设备被接触 但是不支持IE Safari Opera
+        if (isTouch){  //布尔类型
+            canvas.ontouchstart = (e) => {
+                console.log(e.touches)
+                let x = e.touches[0].clientX; //取第一个触摸点的XY值
+                let y = e.touches[0].clientY;
+                start = [x, y];
+            }
+            canvas.ontouchmove = (e) => {
+                let x = e.touches[0].clientX;
+                let y = e.touches[0].clientY;
+                drawLine(start[0], start[1], x, y)
+                start = [x, y];
+            }
+        }else{
+            canvas.onmousedown = (e) => {
+                painting = true;  //当鼠标点击时开始画画 下面用if语句判断
+                start = [e.clientX, e.clientY]  //开始画画时的初始坐标
+                console.log(start)  //输出坐标
+            }
+            canvas.onmousemove = (e) => {
+                if (painting === true) {  //判断是否鼠标点击了
+                    drawLine(start[0], start[1], e.clientX, e.clientY)  //开始位置为鼠标点击位置 结束位置为鼠标移动位置
+                    start = [e.clientX, e.clientY]  //开始位置实时更新为上一次绘画鼠标结束位置
+                }
+                canvas.onmouseup = () => {
+                    painting = false;  //当鼠标放开按键时结束绘画
+                }
+            }
+        }
+    </script>
+</body>
+</html>
